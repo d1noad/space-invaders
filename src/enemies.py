@@ -4,6 +4,7 @@ import pygame
 from base import Sprite
 from entities import Bullet
 from settings import *
+import math
 
 
 class Enemy(Sprite):
@@ -116,7 +117,7 @@ class FastEnemy(Enemy):
             ENEMY_COLORS["fast"],
             hp=1,
             score=20,
-            image_path="../assets/FastEnemy.png"
+            image_path="../assets/BasicEnemy.png"
         )
 
     def shoot(self):
@@ -136,3 +137,39 @@ class ToughEnemy(Enemy):
             image_path="../assets/ToughEnemy.png"
         )
     
+
+class ShotgunEnemy(Enemy):
+    def __init__(self, x: float, y: float):
+        super().__init__(
+            x, y,
+            ENEMY_WIDTH, ENEMY_HEIGHT,
+            ENEMY_COLORS["tough"],
+            hp=2,
+            score=40,
+            image_path="../assets/ShotgunEnemy.png"
+        )
+        self._shot_timer = 0
+    
+    def shoot(self):
+        bullets = []
+        center_x = self.rect.x + self.width // 2 - 2
+        center_y = self.rect.y + self.height
+        
+        # 4 пули в разные стороны: влево-вниз, вниз, вправо-вниз, прямо вниз
+        angles = [-35, -15, 15, 35]
+        
+        for angle in angles:
+            bullet = Bullet(center_x, center_y, SHOTGUN_BULLET_SPEED, RED, "enemy")
+            rad = math.radians(angle)
+            bullet._vx = math.sin(rad) * SHOTGUN_BULLET_SPEED * 0.8
+            bullet._vy = math.cos(rad) * SHOTGUN_BULLET_SPEED
+            bullets.append(bullet)
+        
+        return bullets
+    
+    def update(self, dt: float):
+        super().update(dt)
+        
+        self._shot_timer += dt
+        if self._shot_timer > 4.0:
+            self._shot_timer = 0

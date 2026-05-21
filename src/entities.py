@@ -1,3 +1,4 @@
+
 import pygame
 
 from base import Sprite
@@ -15,6 +16,7 @@ class Bullet(Sprite):
     ): 
         super().__init__(x, y, 4, 12, color)
         self._vy = speed
+        self._vx = 0
         self._owner = owner
 
     
@@ -23,8 +25,11 @@ class Bullet(Sprite):
         return self._owner
     
     def update(self, dt: float):
+        self.x += self._vx * dt
         self.y += self._vy * dt
         if self.y < -20 or self.y > SCREEN_HEIGHT + 20:
+            self.kill()
+        if self.x < -20 or self.x > SCREEN_WIDTH + 20:
             self.kill()
 
 

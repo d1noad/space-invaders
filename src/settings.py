@@ -1,4 +1,4 @@
-
+import json
 
 # Экран
 SCREEN_WIDTH = 800
@@ -50,6 +50,10 @@ ENEMY_ANIM_INTERVAL = 600 # мс между кадрами анимации
 ENEMY_BULLET_SPEED = 250
 ENEMY_SHOOT_CHANCE = 0.0008 # вероятность выстрела за кадр
 
+SHOTGUN_SHOOT_CHANCE = 0.0005
+SHOTGUN_BULLET_SPEED = 200
+SHOTGUN_BULLET_ANGLES = [-30, 0, 30]
+
 # Щиты
 SHIELD_WIDTH = 64
 SHEILD_HEIGHT = 40
@@ -77,3 +81,73 @@ FONT_SIZE_LARGE = 48
 FONT_SIZE_MEDIUM = 28
 FONT_SIZE_SMALL = 18
 HUD_HEIGHT = 40
+
+# Карты
+FORMATIONS = {
+    "RANDOM": None,
+    
+    "klin": [
+        "    E    ",
+        "   EEE   ",
+        "  EEEEE  ",
+        " EEEEEEE ",
+        "EEEEEEEEE",
+    ],
+    
+    "wave": [
+        "E       E",
+        " E     E ",
+        "  E   E  ",
+        "   E E   ",
+        "    E    ",
+    ],
+    
+    "krest": [
+        "    E    ",
+        "    E    ",
+        "EEEEEEEEE",
+        "    E    ",
+        "    E    ",
+    ],
+    
+    "piramida": [
+        "    E    ",
+        "   EEE   ",
+        "  EEEEE  ",
+        " EEEEEEE ",
+        "    E    ",
+    ],
+    
+    "kvadrat": [
+        " EEEEE ",
+        " E   E ",
+        " E   E ",
+        " E   E ",
+        " EEEEE ",
+    ],
+    
+}
+
+FORMATION_NAMES = ["RANDOM", "klin", "wave", "krest", "piramida", "kvadrat"]
+FORMATION_SCREENSHOTS = {
+    "RANDOM": None,
+    "klin": None,
+    "wave": None,
+    "krest": None,
+    "piramida": None,
+    "kvadrat": None
+}
+
+try:
+    with open("custom_maps.json", "r", encoding='utf-8') as f:
+        CUSTOM_MAPS = json.load(f)
+    for custom_map in CUSTOM_MAPS:
+        name = custom_map["name"]
+        if name not in FORMATIONS:
+            FORMATIONS[name] = custom_map["data"]
+        if name not in FORMATION_NAMES:
+            FORMATION_NAMES.append(name)
+        if name not in FORMATION_SCREENSHOTS:
+            FORMATION_SCREENSHOTS[name] = None
+except:
+    pass
