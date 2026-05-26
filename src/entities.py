@@ -112,9 +112,3 @@ class Player(Sprite):
             surface.blit(self.image, self.rect)
 
 
-class ShieldBlock(Sprite):
-    def __init__(self, x: float, y: float):
-        super().__init__(x, y, SHIELD_BLOCK_SIZE, SHIELD_BLOCK_SIZE, SHIELD_COLOR)
-
-    def update(self, dt: float):
-        ...
