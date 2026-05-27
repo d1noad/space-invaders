@@ -23,7 +23,7 @@ class Game:
         self._player = None
         self._formation = None
         self._bullets = []
-        
+        self._win = False
         self._font_small = pygame.font.SysFont(None, FONT_SIZE_SMALL)
         self._font_medium = pygame.font.SysFont(None, FONT_SIZE_MEDIUM)
         self._font_large = pygame.font.SysFont(None, FONT_SIZE_LARGE)
@@ -79,11 +79,14 @@ class Game:
                 self._draw_game()
             elif self._state == "game_over":
                 self._draw_game_over()
+            elif self._state == "win":
+                self._draw_win()
             
             pygame.display.flip()
         
         pygame.quit()
         sys.exit()
+    
     
     def _handle_events(self):
         mouse_pos = pygame.mouse.get_pos()
@@ -171,6 +174,22 @@ class Game:
                             self._state = "menu"
                             self._menu_state = "level"
                             self._paused = False
+
+                    elif self._state == "win":
+                        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                            if self._menu_button_rect and self._menu_button_rect.collidepoint(mouse_pos):
+                                self._menu_state = "level"
+                                self._state = "menu"
+                                self._win = False
+                            elif self._quit_button_rect and self._quit_button_rect.collidepoint(mouse_pos):
+                                self._running = False
+                        elif event.type == pygame.KEYDOWN:
+                            if event.key == pygame.K_ESCAPE:
+                                self._running = False
+                            elif event.key == pygame.K_SPACE:
+                                self._menu_state = "level"
+                                self._state = "menu"
+                                self._win = False
         
     def _start_game(self, level, formation_name):
         self._level = level
@@ -202,12 +221,17 @@ class Game:
         if self._formation.all_dead():
             self._level += 1
             if self._level > MAX_LEVEL:
-                self._state = "game_over"
+                self._state = "win"  # вместо game_over
+                self._win = True
             else:
                 self._formation = Formation(self._level, self._formation._formation_type)
         
-        if not self._player.alive or self._formation.reached_bottom():
+        if not self._player.alive:
             self._state = "game_over"
+            self._win = False
+        elif self._formation.reached_bottom():
+            self._state = "game_over"
+            self._win = False
     
     def _check_collisions(self):
         for bullet in self._bullets[:]:
@@ -404,6 +428,47 @@ class Game:
         score_text = self._font_medium.render(f"СЧЁТ: {self._score}", True, WHITE)
         score_rect = score_text.get_rect(center=(SCREEN_WIDTH // 2, 280))
         self._screen.blit(score_text, score_rect)
+        
+        self._menu_button_rect = pygame.Rect(SCREEN_WIDTH // 2 - 120, 350, 240, 45)
+        pygame.draw.rect(self._screen, GREEN, self._menu_button_rect)
+        pygame.draw.rect(self._screen, WHITE, self._menu_button_rect, 2)
+        menu_text = self._font_medium.render("ГЛАВНОЕ МЕНЮ", True, BLACK)
+        menu_rect = menu_text.get_rect(center=(SCREEN_WIDTH // 2, 372))
+        self._screen.blit(menu_text, menu_rect)
+        
+        self._quit_button_rect = pygame.Rect(SCREEN_WIDTH // 2 - 120, 420, 240, 45)
+        pygame.draw.rect(self._screen, RED, self._quit_button_rect)
+        pygame.draw.rect(self._screen, WHITE, self._quit_button_rect, 2)
+        quit_text = self._font_medium.render("ВЫХОД", True, WHITE)
+        quit_rect = quit_text.get_rect(center=(SCREEN_WIDTH // 2, 442))
+        self._screen.blit(quit_text, quit_rect)
+    
+    def _draw_win(self):
+        self._screen.fill(BLACK)
+        
+        # Показываем последнее состояние игры (уровень, счёт)
+        self._player.draw(self._screen)
+        self._formation.draw(self._screen)
+        for bullet in self._bullets:
+            bullet.draw(self._screen)
+        
+        score_text = self._font_small.render(f"СЧЁТ: {self._score}", True, WHITE)
+        level_text = self._font_small.render(f"УРОВЕНЬ: {self._level}", True, WHITE)
+        self._screen.blit(score_text, (20, 10))
+        self._screen.blit(level_text, (SCREEN_WIDTH // 2 - 40, 10))
+        
+        overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+        overlay.set_alpha(180)
+        overlay.fill(BLACK)
+        self._screen.blit(overlay, (0, 0))
+        
+        win_text = self._font_large.render("ПОБЕДА!", True, GREEN)
+        win_rect = win_text.get_rect(center=(SCREEN_WIDTH // 2, 200))
+        self._screen.blit(win_text, win_rect)
+        
+        score_final = self._font_medium.render(f"ФИНАЛЬНЫЙ СЧЁТ: {self._score}", True, WHITE)
+        score_final_rect = score_final.get_rect(center=(SCREEN_WIDTH // 2, 280))
+        self._screen.blit(score_final, score_final_rect)
         
         self._menu_button_rect = pygame.Rect(SCREEN_WIDTH // 2 - 120, 350, 240, 45)
         pygame.draw.rect(self._screen, GREEN, self._menu_button_rect)
